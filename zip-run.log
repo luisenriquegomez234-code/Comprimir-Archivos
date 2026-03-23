@@ -1,0 +1,6 @@
+[dom 22/03/2026 19:14:38,10] Iniciando 
+[dom 22/03/2026 19:14:38,10] Ejecutando npm run build 
+[dom 22/03/2026 19:14:44,61] npm finished with exit code 0 
+[dom 22/03/2026 19:14:44,61] Intentando comprimir con PowerShell 
+COMPRESS_OK
+[dom 22/03/2026 19:14:46,77] OK: build.zip creado 
