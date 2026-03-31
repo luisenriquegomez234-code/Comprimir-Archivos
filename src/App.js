@@ -12,7 +12,8 @@ function App() {
     saludtotal: "SALUD TOTAL EPS S S.A",
     bolivar: "COMPAÑIA DE SEGUROS BOLIVAR S.A",
     mundial: "COMPAÑIA MUNDIAL DE SEGUROS S.A",
-    sanitas: "ENTIDAD PROMOTORA DE SALUD SANITAS S.A.S",
+    sanitas:
+      "ENTIDAD PROMOTORA DE SALUD SANITAS S.A.S – EN INTERVENCIÓN BAJO LA MEDIDA DE TOMA DE POSESIÓN",
     previsora: "LA PREVISORA S.A COMPAÑÍA DE SEGUROS",
   };
 
@@ -52,60 +53,118 @@ function App() {
   // Lógica específica por compañía
   const procesarPositiva = async (selectedFiles) => {
     const zipGroups = {};
-    const pdfZips = {};
     const logEntries = [];
+    const filesByFactura = {};
 
+    // Agrupar archivos por el número de factura (prefijo + numero)
     for (const file of selectedFiles) {
       const info = extractFileInfo(file.name);
-      const ext = info.extension;
+      if (!info.prefijo || !info.numero) continue;
+      const facturaId = `${info.prefijo}${info.numero}`;
+      if (!filesByFactura[facturaId]) {
+        filesByFactura[facturaId] = [];
+      }
+      filesByFactura[facturaId].push(file);
+    }
 
-      // Archivos para Rips_Prefijo+Numero
-      if (["xml", "txt", "json"].includes(ext)) {
-        const zipName = `Rips_${info.prefijo}${info.numero}.zip`;
-        if (!zipGroups[zipName]) {
-          zipGroups[zipName] = new JSZip();
+    for (const facturaId in filesByFactura) {
+      const filesInGroup = filesByFactura[facturaId];
+      const ripsZipName = `Rips_${facturaId}.zip`;
+      const pdfZipName = `${facturaId}.zip`;
+
+      const ripsZip = new JSZip();
+      const pdfZip = new JSZip();
+      let hasRipsFiles = false;
+      let hasPdfFiles = false;
+
+      for (const file of filesInGroup) {
+        const ext = file.name.split(".").pop().toLowerCase();
+        const fileNameLower = file.name.toLowerCase();
+
+        // Rips_Prefijo+Numero de Factura.zip (ad.XML, ResultadosMSPS.txt, Rips.json)
+        if (
+          fileNameLower.endsWith("ad.xml") ||
+          fileNameLower.endsWith("resultadosmsps.txt") ||
+          fileNameLower.endsWith("rips.json")
+        ) {
+          const content = await file.arrayBuffer();
+          ripsZip.file(file.name, content);
+          hasRipsFiles = true;
+          logEntries.push({
+            name: file.name,
+            action: `Incluido en ${ripsZipName}`,
+          });
         }
-        const content = await file.arrayBuffer();
-        zipGroups[zipName].file(file.name, content);
-        logEntries.push({ name: file.name, action: `Incluido en ${zipName}` });
+        // Prefijo + Numero de Factura.zip (PDFs, excluyendo los que empiezan con CTFE)
+        else if (ext === "pdf") {
+          if (!file.name.startsWith("CTFE")) {
+            const content = await file.arrayBuffer();
+            pdfZip.file(file.name, content);
+            hasPdfFiles = true;
+            logEntries.push({
+              name: file.name,
+              action: `Incluido en ${pdfZipName}`,
+            });
+          } else {
+            logEntries.push({
+              name: file.name,
+              action: "Excluido (PDF con prefijo CTFE)",
+            });
+          }
+        }
       }
 
-      // PDFs (excluir que comienzan con CTFE)
-      if (ext === "pdf" && !file.name.startsWith("CTFE")) {
-        const zipName = `${info.prefijo}${info.numero}.zip`;
-        if (!pdfZips[zipName]) {
-          pdfZips[zipName] = new JSZip();
-        }
-        const content = await file.arrayBuffer();
-        pdfZips[zipName].file(file.name, content);
-        logEntries.push({ name: file.name, action: `Incluido en ${zipName}` });
-      } else if (ext === "pdf" && file.name.startsWith("CTFE")) {
-        logEntries.push({
-          name: file.name,
-          action: "Excluido (PDF con prefijo CTFE)",
-        });
+      if (hasRipsFiles) {
+        zipGroups[ripsZipName] = ripsZip;
+      }
+      if (hasPdfFiles) {
+        zipGroups[pdfZipName] = pdfZip;
       }
     }
 
-    return { zipGroups: { ...zipGroups, ...pdfZips }, logEntries };
+    return { zipGroups, logEntries };
   };
 
   const procesarSaludTotal = async (selectedFiles) => {
     const zipGroups = {};
     const logEntries = [];
+    const filesByFactura = {};
 
+    // Agrupar archivos por NIT, prefijo y número de factura
     for (const file of selectedFiles) {
       const nit = extractNit(file.name);
       const info = extractFileInfo(file.name);
+      const fileNameLower = file.name.toLowerCase();
 
-      if (file.name.includes(".json")) {
-        const zipName = `${nit}_${info.prefijo}${info.numero}.zip`;
-        if (!zipGroups[zipName]) {
-          zipGroups[zipName] = new JSZip();
+      if (
+        nit &&
+        info.prefijo &&
+        info.numero &&
+        (fileNameLower.endsWith("_cuv.json") ||
+          fileNameLower.endsWith("_rips.json"))
+      ) {
+        const facturaId = `${nit}_${info.prefijo}${info.numero}`;
+        if (!filesByFactura[facturaId]) {
+          filesByFactura[facturaId] = [];
         }
+        filesByFactura[facturaId].push(file);
+      }
+    }
+
+    for (const facturaId in filesByFactura) {
+      const filesInGroup = filesByFactura[facturaId];
+      const zipName = `${facturaId}.zip`;
+      const zip = new JSZip();
+
+      for (const file of filesInGroup) {
         const content = await file.arrayBuffer();
-        zipGroups[zipName].file(file.name, content);
+        zip.file(file.name, content);
         logEntries.push({ name: file.name, action: `Incluido en ${zipName}` });
+      }
+
+      // La instrucción dice "dentro de la carpeta COMPRIMIDO", lo cual manejamos al guardar.
+      if (!zipGroups[zipName]) {
+        zipGroups[zipName] = zip;
       }
     }
 
@@ -113,31 +172,54 @@ function App() {
   };
 
   const procesarBolivar = async (selectedFiles) => {
-    const zipData = new JSZip();
+    const zipGroups = {};
     const logEntries = [];
+    const filesByFactura = {};
 
+    // Agrupar archivos por número de factura
     for (const file of selectedFiles) {
-      const ext = file.name.split(".").pop().toLowerCase();
+      const info = extractFileInfo(file.name);
+      if (!info.prefijo || !info.numero) continue;
 
-      // Incluir pdf, txt, json (excluir PDFs que comienzan con CTFE)
-      if (["pdf", "txt", "json"].includes(ext)) {
-        if (ext === "pdf" && file.name.startsWith("CTFE")) {
-          logEntries.push({
-            name: file.name,
-            action: "Excluido (PDF con prefijo CTFE)",
-          });
-          continue;
-        }
-        const content = await file.arrayBuffer();
-        zipData.file(file.name, content);
-        logEntries.push({ name: file.name, action: "Incluido en ZIP" });
+      const facturaId = `${info.prefijo}${info.numero}`;
+      if (!filesByFactura[facturaId]) {
+        filesByFactura[facturaId] = [];
       }
+      filesByFactura[facturaId].push(file);
     }
 
-    const info = extractFileInfo(selectedFiles[0]?.name || "");
-    const zipName = `FAC_${info.prefijo}${info.numero}.zip`;
+    for (const facturaId in filesByFactura) {
+      const filesInGroup = filesByFactura[facturaId];
+      const zipName = `FAC_${facturaId}.zip`;
+      const zip = new JSZip();
+      let hasFiles = false;
 
-    return { zipGroups: { [zipName]: zipData }, logEntries };
+      for (const file of filesInGroup) {
+        const ext = file.name.split(".").pop().toLowerCase();
+
+        if (["pdf", "txt", "json"].includes(ext)) {
+          if (ext === "pdf" && file.name.startsWith("CTFE")) {
+            logEntries.push({
+              name: file.name,
+              action: "Excluido (PDF con prefijo CTFE)",
+            });
+            continue;
+          }
+          const content = await file.arrayBuffer();
+          zip.file(file.name, content);
+          hasFiles = true;
+          logEntries.push({
+            name: file.name,
+            action: `Incluido en ${zipName}`,
+          });
+        }
+      }
+
+      if (hasFiles) {
+        zipGroups[zipName] = zip;
+      }
+    }
+    return { zipGroups, logEntries };
   };
 
   const procesarMundial = async (selectedFiles) => {
@@ -164,31 +246,55 @@ function App() {
   };
 
   const procesarSanitas = async (selectedFiles) => {
-    const zipData = new JSZip();
+    const zipGroups = {};
     const logEntries = [];
+    const filesByFactura = {};
 
+    // Agrupar por factura
     for (const file of selectedFiles) {
-      const ext = file.name.split(".").pop().toLowerCase();
+      const info = extractFileInfo(file.name);
+      if (!info.prefijo || !info.numero) continue;
+      const facturaId = `${info.prefijo}${info.numero}`;
+      if (!filesByFactura[facturaId]) {
+        filesByFactura[facturaId] = [];
+      }
+      filesByFactura[facturaId].push(file);
+    }
 
-      // Incluir ad.xml, pdf, json (excluir PDFs que comienzan con CTFE)
-      if (["xml", "pdf", "json"].includes(ext)) {
-        if (ext === "pdf" && file.name.startsWith("CTFE")) {
+    for (const facturaId in filesByFactura) {
+      const filesInGroup = filesByFactura[facturaId];
+      const zipName = `${facturaId}.zip`;
+      const zip = new JSZip();
+      let hasFiles = false;
+
+      for (const file of filesInGroup) {
+        const ext = file.name.split(".").pop().toLowerCase();
+
+        // La instrucción dice "ad.xml", pero mantendré la extensión .xml por generalidad.
+        if (["xml", "pdf", "json"].includes(ext)) {
+          if (ext === "pdf" && file.name.startsWith("CTFE")) {
+            logEntries.push({
+              name: file.name,
+              action: "Excluido (PDF con prefijo CTFE)",
+            });
+            continue;
+          }
+          const content = await file.arrayBuffer();
+          zip.file(file.name, content);
+          hasFiles = true;
           logEntries.push({
             name: file.name,
-            action: "Excluido (PDF con prefijo CTFE)",
+            action: `Incluido en ${zipName}`,
           });
-          continue;
         }
-        const content = await file.arrayBuffer();
-        zipData.file(file.name, content);
-        logEntries.push({ name: file.name, action: "Incluido en ZIP" });
+      }
+
+      if (hasFiles) {
+        zipGroups[zipName] = zip;
       }
     }
 
-    const info = extractFileInfo(selectedFiles[0]?.name || "");
-    const zipName = `${info.prefijo}${info.numero}.zip`;
-
-    return { zipGroups: { [zipName]: zipData }, logEntries };
+    return { zipGroups, logEntries };
   };
 
   const procesarPrevisora = async (selectedFiles) => {
@@ -297,7 +403,9 @@ function App() {
       }
 
       alert(
-        `Compresión completada. Se generaron ${Object.keys(result.zipGroups).length} archivo(s).`,
+        `Compresión completada. Se generaron ${
+          Object.keys(result.zipGroups).length
+        } archivo(s).`,
       );
     } catch (error) {
       console.error("Error en la compresión:", error);
@@ -333,7 +441,8 @@ function App() {
             <option value="bolivar">COMPAÑIA DE SEGUROS BOLIVAR S.A</option>
             <option value="mundial">COMPAÑIA MUNDIAL DE SEGUROS S.A</option>
             <option value="sanitas">
-              ENTIDAD PROMOTORA DE SALUD SANITAS S.A.S
+              ENTIDAD PROMOTORA DE SALUD SANITAS S.A.S – EN INTERVENCIÓN BAJO LA
+              MEDIDA DE TOMA DE POSESIÓN
             </option>
             <option value="previsora">
               LA PREVISORA S.A COMPAÑÍA DE SEGUROS
