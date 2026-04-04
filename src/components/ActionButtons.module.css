@@ -1,0 +1,145 @@
+@import "../styles/variables.css";
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-lg);
+  background: var(--color-light);
+  border-radius: var(--radius-md);
+}
+
+/* ===== BUTTON BASE STYLES ===== */
+.compressBtn,
+.clearBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  min-height: var(--btn-min-height);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  border: none;
+  border-radius: var(--btn-border-radius);
+  font-size: 1rem;
+  font-weight: var(--btn-font-weight);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ===== COMPRESS BUTTON (Primary) ===== */
+.compressBtn {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-primary-dark)
+  );
+  color: var(--color-white);
+}
+
+.compressBtn:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-dark),
+    var(--color-primary-dark)
+  );
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.compressBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+.compressBtn:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+/* ===== LOADING STATE ===== */
+.compressBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.compressBtn:disabled .spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== CLEAR BUTTON (Danger) ===== */
+.clearBtn {
+  background: linear-gradient(135deg, var(--color-danger), #c0392b);
+  color: var(--color-white);
+}
+
+.clearBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b, var(--color-danger));
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.clearBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+.clearBtn:focus-visible {
+  outline: 2px solid var(--color-danger);
+  outline-offset: 2px;
+}
+
+.clearBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+
+  .compressBtn,
+  .clearBtn {
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-sm);
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actions {
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+  }
+
+  .compressBtn,
+  .clearBtn {
+    padding: var(--btn-padding-y) var(--spacing-sm);
+    font-size: 0.9rem;
+  }
+
+  .compressBtn,
+  .clearBtn {
+    min-height: 40px;
+    padding: 10px 12px;
+  }
+}

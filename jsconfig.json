@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "checkJs": false,
+    "allowJs": true,
+    "baseUrl": "src"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "build", "coverage"]
+}

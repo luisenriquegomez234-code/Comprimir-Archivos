@@ -1,0 +1,40 @@
+.selectors {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.selector {
+  flex: 1;
+  text-align: center;
+}
+
+.selector h2 {
+  font-size: 1.6em;
+  color: #0f2027;
+  margin-bottom: 15px;
+}
+
+.file-btn,
+.folder-btn {
+  display: inline-block;
+  background: #00c6ff;
+  color: #fff;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.file-btn:hover,
+.folder-btn:hover {
+  background: #0072ff;
+}
+
+.file-btn input,
+.folder-btn input {
+  display: none;
+}

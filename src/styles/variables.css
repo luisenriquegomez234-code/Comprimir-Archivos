@@ -1,0 +1,101 @@
+:root {
+  /* ===== COLORS ===== */
+  --color-primary: #3498db;
+  --color-primary-dark: #2980b9;
+  --color-primary-light: #5dade2;
+  --color-success: #27ae60;
+  --color-danger: #e74c3c;
+  --color-warning: #f39c12;
+  --color-dark: #2c3e50;
+  --color-dark-light: #34495e;
+  --color-light: #ecf0f1;
+  --color-light-dark: #bdc3c7;
+  --color-gray: #95a5a6;
+  --color-gray-light: #d5dbdb;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* ===== TYPOGRAPHY ===== */
+  --font-primary: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-base: 16px;
+  --font-size-large: 24px;
+  --font-size-extra-large: 32px;
+  --font-size-small: 14px;
+  --font-size-extra-small: 12px;
+  --line-height-base: 1.5;
+  --line-height-heading: 1.2;
+
+  /* ===== SPACING ===== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* ===== BORDER RADIUS ===== */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ===== SHADOWS ===== */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+
+  /* ===== TRANSITIONS & ANIMATIONS ===== */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+
+  /* ===== BREAKPOINTS (Mobile First) ===== */
+  /* Mobile: 320px - 480px */
+  /* Tablet: 481px - 768px */
+  /* Desktop: 769px - 1920px */
+  /* Ultra-wide: 1921px+ */
+
+  /* ===== Z-INDEX ===== */
+  --z-dropdown: 100;
+  --z-modal: 1000;
+  --z-tooltip: 1100;
+
+  /* ===== LAYOUT ===== */
+  --container-max-width: 1200px;
+  --container-padding-mobile: 16px;
+  --container-padding-tablet: 24px;
+  --container-padding-desktop: 32px;
+
+  /* ===== BUTTONS ===== */
+  --btn-padding-y: 12px;
+  --btn-padding-x: 24px;
+  --btn-border-radius: var(--radius-md);
+  --btn-font-weight: 600;
+  --btn-min-height: 44px;
+
+  /* ===== INPUTS ===== */
+  --input-padding-y: 10px;
+  --input-padding-x: 12px;
+  --input-border-radius: var(--radius-md);
+  --input-border-width: 2px;
+  --input-border-color: var(--color-gray-light);
+  --input-border-color-focus: var(--color-primary);
+  --input-min-height: 44px;
+
+  /* ===== FORMS ===== */
+  --label-font-weight: 600;
+  --label-color: var(--color-dark);
+  --label-margin-bottom: var(--spacing-sm);
+}
+
+/* ===== DARK MODE (Optional) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-dark: #ecf0f1;
+    --color-light: #2c3e50;
+    --color-gray: #95a5a6;
+    --color-white: #1a1a1a;
+    --color-black: #ffffff;
+  }
+}
