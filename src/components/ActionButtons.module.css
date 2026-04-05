@@ -1,145 +1,84 @@
-@import "../styles/variables.css";
-
 .actions {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: var(--spacing-lg);
-  margin: var(--spacing-lg) 0;
-  padding: var(--spacing-lg);
-  background: var(--color-light);
-  border-radius: var(--radius-md);
+  gap: 1.5rem;
+  margin: 1rem 0;
+  width: 100%;
 }
 
-/* ===== BUTTON BASE STYLES ===== */
-.compressBtn,
-.clearBtn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  min-height: var(--btn-min-height);
-  padding: var(--btn-padding-y) var(--btn-padding-x);
-  border: none;
-  border-radius: var(--btn-border-radius);
-  font-size: 1rem;
-  font-weight: var(--btn-font-weight);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-md);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ===== COMPRESS BUTTON (Primary) ===== */
 .compressBtn {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary),
-    var(--color-primary-dark)
-  );
-  color: var(--color-white);
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  padding: 1.25rem 3rem;
+  border-radius: 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+  flex: 2;
 }
 
 .compressBtn:hover:not(:disabled) {
-  background: linear-gradient(
-    135deg,
-    var(--color-primary-dark),
-    var(--color-primary-dark)
-  );
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 20px 30px -10px rgba(37, 99, 235, 0.5);
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
 }
 
 .compressBtn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: var(--shadow-md);
+  transform: translateY(0) scale(1);
 }
 
-.compressBtn:focus-visible {
-  outline: 2px solid var(--color-primary-dark);
-  outline-offset: 2px;
-}
-
-/* ===== LOADING STATE ===== */
 .compressBtn:disabled {
-  opacity: 0.7;
+  background: #94a3b8;
+  box-shadow: none;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
-.compressBtn:disabled .spinner {
+.clearBtn {
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem 2rem;
+  border-radius: 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.clearBtn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.spinner {
   display: inline-block;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* ===== CLEAR BUTTON (Danger) ===== */
-.clearBtn {
-  background: linear-gradient(135deg, var(--color-danger), #c0392b);
-  color: var(--color-white);
-}
-
-.clearBtn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #c0392b, var(--color-danger));
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.clearBtn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: var(--shadow-md);
-}
-
-.clearBtn:focus-visible {
-  outline: 2px solid var(--color-danger);
-  outline-offset: 2px;
-}
-
-.clearBtn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .actions {
     flex-direction: column;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
   }
-
-  .compressBtn,
-  .clearBtn {
+  .compressBtn, .clearBtn {
     width: 100%;
-    padding: var(--spacing-md) var(--spacing-sm);
-    font-size: 0.95rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .actions {
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm);
-  }
-
-  .compressBtn,
-  .clearBtn {
-    padding: var(--btn-padding-y) var(--spacing-sm);
-    font-size: 0.9rem;
-  }
-
-  .compressBtn,
-  .clearBtn {
-    min-height: 40px;
-    padding: 10px 12px;
+    flex: none;
   }
 }

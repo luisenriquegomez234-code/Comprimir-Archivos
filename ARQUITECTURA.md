@@ -49,26 +49,28 @@ Una herramienta web moderna que permite a los usuarios seleccionar múltiples ar
 │                    CAPA DE LÓGICA                            │
 │         (Servicios y Utilidades de Compresión)              │
 │  ┌────────────────────────────────────────────────────┐    │
+│  │ genericProcessor.js (Motor Dinámico)                │    │
+│  │ - applyRules(config)                                │    │
 │  │ compressionService.js (Gestión de ZIP)              │    │
 │  │ - crearZip()                                        │    │
-│  │ - descargarArchivo()                                │    │
-│  │ - generarLog()                                      │    │
+│  │ fileSystemService.js (Gestión Local de Archivos)    │    │
+│  │ - writeZipFile()                                    │    │
 │  └────────────────────────────────────────────────────┘    │
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────────────┐
 │                   CAPA DE ESTADO                             │
 │                    (React Hooks)                             │
-│  - useState (archivos, log)                                  │
-│  - useEffect (inicialización)                                │
-│  - useCallback (optimización)                                │
+│  - useEntityProcessing (Reglas)                              │
+│  - useFileSelection (Interfaces)                             │
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────┴────────────────────────────────────┐
-│                  LIBRERÍAS EXTERNAS                          │
+│                  RUNTIME Y LIBRERÍAS EXTERNAS                │
+│  - Electron (Escritorio Empaquetado)                         │
+│  - File System Access API (Escritura Silenciosa en Disco)    │
 │  - JSZip (Compresión)                                        │
 │  - React (UI Framework)                                      │
-│  - File API (Navigador)                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -76,24 +78,23 @@ Una herramienta web moderna que permite a los usuarios seleccionar múltiples ar
 
 ## 💻 Stack Tecnológico Detallado
 
-### **Frontend**
+### **Frontend & Motor**
 
 | Capa           | Tecnología    | Versión | Propósito                       |
 | -------------- | ------------- | ------- | ------------------------------- |
 | **Framework**  | React         | 18.2.0  | Interfaz de usuario reactiva    |
+| **App Nivel**  | Electron      | 29.1.5  | Contenedor nativo de escritorio |
+| **Archivos**   | File System API| Local  | Lectura/Escritura directa a OS  |
 | **Compresión** | JSZip         | 3.10.1  | Crear archivos ZIP en navegador |
-| **Build Tool** | React Scripts | 5.0.1   | Bundler y dev server            |
-| **Styling**    | CSS3          | -       | Estilos personalizados          |
-| **Runtime**    | Node.js       | 14+     | Entorno de desarrollo           |
+| **Styling**    | CSS Modules   | -       | Estilos locales aislados        |
 
 ### **Deployment**
 
 | Componente  | Opción                          | Notas                       |
 | ----------- | ------------------------------- | --------------------------- |
-| **Hosting** | Vercel / Netlify / GitHub Pages | SPA estática, sin servidor  |
-| **CDN**     | Automático (incluido)           | Distribución global         |
-| **SSL/TLS** | Automático                      | Certificado Let's Encrypt   |
-| **Dominio** | Personalizado recomendado       | ej: comprimir.tudominio.com |
+| **Empaque** | Electron Builder                | Genera el archivo .exe final|
+| **Ambiente**| Aplicación de Escritorio        | Funciona sin conexión local |
+| **Config**  | JSON Externa                    | Actualizable sin re-build   |
 
 ### **Ambiente de Desarrollo**
 
@@ -101,115 +102,64 @@ Una herramienta web moderna que permite a los usuarios seleccionar múltiples ar
 {
   "Node.js": "16.x o superior",
   "npm": "8.x o superior",
-  "Git": "Para control de versiones",
-  "VS Code": "Editor recomendado",
-  "Navegadores soportados": "Chrome 90+, Firefox 88+, Safari 14+, Edge 90+"
+  "Empaquetado": "npx electron-builder",
+  "OS Objetivo": "Windows (Portable & Program Files)"
 }
 ```
 
 ---
 
-## 📁 Estructura de Carpetas Recomendada
+## 📁 Estructura de Carpetas Recomendada (Actualizada)
 
 ```
 comprimir-archivos/
-├── .git/                          # Control de versiones
-├── .gitignore                     # Archivos a ignorar en Git
-├── node_modules/                  # Dependencias (generado)
 ├── public/                        # Activos públicos
-│   ├── index.html                # HTML principal
-│   ├── favicon.ico                # Icono de pestaña
-│   ├── manifest.json             # Configuración PWA
-│   ├── robots.txt                # SEO
-│   └── logo-clinica.png          # Logo de la aplicación
+│   ├── entidades_config.json      # REGLAS DE NEGOCIO DINÁMICAS (JSON)
+│   ├── electron.js               # Punto de entrada de Electron
+│   ├── preload.js                # Puente opcional Electron-React
+│   └── index.html                # HTML principal
 ├── src/                           # Código fuente
-│   ├── components/               # Componentes reutilizables
-│   │   ├── FileSelector/        # Selector de archivos
-│   │   │   ├── FileSelector.js
-│   │   │   ├── FileSelector.css
-│   │   │   └── FileSelector.test.js
-│   │   ├── CompressionLog/      # Log de compresión
-│   │   │   ├── CompressionLog.js
-│   │   │   ├── CompressionLog.css
-│   │   │   └── CompressionLog.test.js
-│   │   ├── Header/              # Encabezado
-│   │   │   ├── Header.js
-│   │   │   ├── Header.css
-│   │   │   └── Header.test.js
-│   │   └── ActionButtons/       # Botones de acción
-│   │       ├── ActionButtons.js
-│   │       ├── ActionButtons.css
-│   │       └── ActionButtons.test.js
-│   ├── services/                 # Servicios y utilidades
-│   │   ├── compressionService.js  # Lógica de compresión
-│   │   ├── fileService.js         # Manejo de archivos
-│   │   └── downloadService.js     # Descargas
-│   ├── hooks/                     # Custom Hooks
-│   │   ├── useFileSelection.js    # Hook para selección
-│   │   └── useCompression.js      # Hook para compresión
-│   ├── utils/                     # Utilidades generales
-│   │   ├── validators.js          # Validadores
-│   │   ├── formatters.js          # Formateadores
-│   │   └── constants.js           # Constantes de la app
-│   ├── styles/                    # Estilos globales
-│   │   ├── App.css               # Estilos principales
-│   │   ├── index.css             # Estilos globales
-│   │   └── variables.css         # Variables y temas
-│   ├── App.js                     # Componente principal
-│   ├── App.css                    # Estilos de App
-│   ├── App.test.js               # Tests de App
-│   ├── index.js                   # Punto de entrada
-│   ├── index.css                  # Estilos de index
-│   ├── reportWebVitals.js        # Métricas de rendimiento
-│   └── setupTests.js             # Configuración de tests
-├── build/                         # Compilación final (generado)
-│   ├── index.html
-│   ├── static/
-│   │   ├── css/
-│   │   └── js/
-│   └── ...
-├── .env                           # Variables de entorno (local)
-├── .env.example                   # Ejemplo de variables
-├── .browserlistrc                 # Navegadores soportados
-├── .eslintrc                      # Configuración ESLint
-├── .prettierrc                    # Configuración Prettier
-├── package.json                   # Dependencias de npm
-├── package-lock.json             # Lock file
-├── zip-build.js                   # Script de compilación
-├── README.md                      # Documentación
-├── ARQUITECTURA.md               # Este archivo
-│── CHANGELOG.md                  # Historial de cambios
-├── CONTRIBUTING.md               # Guía de contribución
-└── LICENSE                        # Licencia MIT
+│   ├── components/               # UI aislada (CSS Modules)
+│   ├── services/                 # Servicios 
+│   │   ├── genericProcessor.js    # Lógica de reglas JSON a RegEx
+│   │   ├── fileSystemService.js   # Manejo avanzado de disco directo
+│   │   ├── compressionService.js  # Lógica de compresión ZIP
+│   │   └── entityProcessors/      # Archivos Legacy removibles
+│   ├── hooks/                     # Custom Hooks (useEntityProcessing)
+│   ├── utils/                     # Constantes de la app
+│   └── index.js                   # Ejecutor web
+├── dist/                          # Compilación de Ejecutables (.exe)
+├── package.json                   # Dependencias npm y comandos
+├── DOCUMENTACION.md               # Manual Técnico y Usuarios
+└── ARQUITECTURA.md                # Este archivo
 
 ```
 
 ---
 
-## 🔄 Flujo de Datos
+## 🔄 Flujo de Datos Dinámico (File System Access)
 
 ```mermaid
 sequenceDiagram
     participant Usuario
     participant UI as React UI
-    participant Service as Compression Service
-    participant JSZip as JSZip Library
-    participant Browser as File API
-
-    Usuario->>UI: 1. Selecciona archivos/carpeta
-    UI->>UI: 2. Almacena en estado (useState)
-    Usuario->>UI: 3. Hace clic en "Comprimir"
-    UI->>Service: 4. Llama crearZip(files)
-    Service->>JSZip: 5. new JSZip()
-    loop Para cada archivo
-        Service->>Service: 6. Lee contenido (arrayBuffer)
-        Service->>JSZip: 7. zip.file(name, contenido)
+    participant Service as Generic Processor
+    participant FSA as File System API
+    participant JSZip as JSZip
+    
+    Usuario->>UI: 1. Selecciona raíz CXC y Entidad
+    UI->>Service: 2. Pasa target e ID entidad
+    Service->>UI: 3. Fetch public/entidades_config.json
+    Service->>FSA: 4. Pide lectura de subdirectorios
+    loop Evaluando Reglas (RegEx)
+        Service->>FSA: 5. Filtra carpetas según regex (ej. ^CTFE)
+        Service->>FSA: 6. Filtra archivos (ej. \\.pdf$) excluyendo exclusiones
+        Service->>JSZip: 7. Envía Buffer a Compress
+        JSZip->>Service: 8. generateAsync(blob)
+        Service->>FSA: 9. writeZipFile(blob a disco directo) [Guardado Silencioso]
     end
-    JSZip->>Service: 8. generateAsync(blob)
-    Service->>Browser: 9. Crea descarga (Blob)
-    Browser->>Usuario: 10. Descarga archivo ZIP
-    Service->>UI: 11. Actualiza log
-    UI->>Usuario: 12. Muestra confirmación
+    Service->>UI: 10. Actualiza log (LogCallback)
+    UI->>Usuario: 11. Muestra Log completo al usuario 
 ```
 
 ---
@@ -218,20 +168,9 @@ sequenceDiagram
 
 ### Implementadas ✅
 
-- Compresión en navegador (sin servidor)
-- Sin almacenamiento de datos del usuario
-- Sin envío de archivos a servidor
-- Sin cookies ni tracking
-- HTTPS obligatorio en producción
-
-### Recomendaciones Futuras 🔲
-
-- Validación de tipos MIME
-- Límites de tamaño de archivo
-- Scanning de malware (VirusTotal API)
-- Compresión con contraseña (cifrado)
-- Content Security Policy (CSP)
-- Política de privacidad clara
+- **Compresión Local en Memoria:** Electron + Chrome sin envíos externos.
+- **Acceso Exclusivo FS API:** Sin *Node Integration*, mantiene sandboxed la lectura.
+- **Protección de Datos OS:** Bloquea inyección al no usar servidor Node, la manipulación es de buffers locales en RAM.
 
 ---
 
@@ -239,49 +178,44 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph UI["🎨 Capa de Presentación"]
-        A["Header<br/>Logo + Título"]
-        B["FileSelector<br/>Inputs: Archivos/Carpeta"]
-        C["ActionButtons<br/>Comprimir + Limpiar"]
-        D["CompressionLog<br/>Historial"]
+    subgraph UI["🎨 Capa de Presentación (React)"]
+        A["Header"]
+        B["FileSelector & EntitySelector"]
+        C["ActionButtons"]
+        D["CompressionLog"]
     end
 
-    subgraph Logic["⚙️ Capa de Lógica"]
-        E["compressionService.js<br/>- crearZip()<br/>- descargarArchivo()"]
-        F["fileService.js<br/>- validarArchivos()<br/>- calcularTamaño()"]
-        G["downloadService.js<br/>- descargarBlob()"]
+    subgraph Config["⚙️ Reglas de Negocio"]
+        Z["public/entidades_config.json<br/>(RegEx & Matches)"]
     end
 
-    subgraph State["📦 Capa de Estado"]
-        H["useState hooks<br/>files, log, loading"]
-        I["useCallback optimización"]
+    subgraph Logic["🧠 Motor Dinámico"]
+        E["genericProcessor.js<br/>- match de reglas<br/>- control iterativo"]
+        F["fileSystemService.js<br/>- File System API<br/>- Guardado en Disco"]
+        G["compressionService.js"]
     end
 
-    subgraph External["🌐 Librerías Externas"]
-        J["JSZip 3.10.1<br/>Compresión ZIP"]
-        K["React 18.2.0<br/>Framework"]
-        L["File API<br/>Navegador"]
+    subgraph Desktop["🌐 Embalaje Nativo"]
+        K["Electron Core"]
+        L["Local Disk IO"]
     end
 
     A -.-> B
     B -.-> C
     C -.-> D
-    B -->|handleFileChange| H
-    C -->|onClick| E
+    B -->|selecciona| Logic
+    Z -->|provee rutas| E
+    C -->|onClick start| E
     E --> F
-    E --> J
     E --> G
-    F -.->|validación| E
-    G -->|generateAsync| K
-    J -->|blob| G
-    L -->|arrayBuffer| E
-    H -->|actualiza| A
-    H -->|actualiza| D
+    G -->|Blob final| F
+    F -->|Salida sin prompt| L
+    K -->|Envuelve UI| UI
 
     style UI fill:#e1f5ff
+    style Config fill:#ffe0b2
     style Logic fill:#fff3e0
-    style State fill:#f3e5f5
-    style External fill:#e8f5e9
+    style Desktop fill:#e8f5e9
 ```
 
 ---

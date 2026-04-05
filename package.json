@@ -2,6 +2,8 @@
   "name": "comprimir-archivos",
   "version": "1.0.0",
   "private": true,
+  "main": "build/electron.js",
+  "homepage": "./",
   "dependencies": {
     "jszip": "^3.10.1",
     "react": "^18.2.0",
@@ -10,14 +12,40 @@
     "web-vitals": "^5.1.0"
   },
   "devDependencies": {
-    "cross-zip": "^4.0.1"
+    "cross-zip": "^4.0.1",
+    "electron": "^29.1.5",
+    "electron-builder": "^24.13.3",
+
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "build-zip": "npm run build && node zip-build.js",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron:dev": "concurrently \"set BROWSER=none&&npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:build": "npm run build && electron-builder --dir"
+  },
+  "build": {
+    "appId": "com.comprimirarchivos.app",
+    "productName": "Comprimir Archivos",
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "public/icon.png"
+    },
+    "files": [
+      "build/**/*",
+      "electron.js",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
+    }
   },
   "eslintConfig": {
     "extends": [

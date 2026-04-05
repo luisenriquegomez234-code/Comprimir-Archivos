@@ -3,29 +3,31 @@ import styles from "./FileSelector.module.css";
 
 function FileSelector({ onSelectFolder, folderName, disabled }) {
   return (
-    <div className={styles.selectors}>
-      <div className={styles.selector}>
-        <h2>📁 Carpeta de Trabajo</h2>
-        <p className={styles.hint}>
-          Selecciona la <strong>carpeta CXC</strong> (ej: <em>CXC 122781</em>) o la carpeta que la contiene (ej: <em>POSITIVA COMPAÑIA DE SEGUROS S.A</em>)
-        </p>
-        <button
-          className={styles.fileBtn}
-          onClick={onSelectFolder}
-          disabled={disabled}
-          aria-label="Seleccionar carpeta raíz"
-        >
-          🗂️ Seleccionar Carpeta
-        </button>
-        {folderName && (
-          <div className={styles.selectedInfo} aria-live="polite">
-            <span className={styles.selectedInfoTitle}>
-              ✅ Carpeta seleccionada:
-            </span>
-            <span className={styles.folderName}> {folderName}</span>
-          </div>
-        )}
-      </div>
+    <div className={styles.selectorContainer}>
+      <header className={styles.header}>
+        <span className={styles.icon}>📂</span>
+        <h2 className={styles.title}>Origen de Archivos</h2>
+      </header>
+      
+      {/* Retirada la pista de ejemplo por petición del usuario */}
+
+      <button
+        className={styles.fileBtn}
+        onClick={onSelectFolder}
+        disabled={disabled}
+        type="button"
+        aria-label="Abrir explorador para elegir carpeta"
+      >
+        <span>📂 Examinar Directorio</span>
+      </button>
+
+      {folderName && (
+        <div className={styles.statusBadge} aria-live="polite">
+          <span className={styles.statusIcon}>📍</span>
+          <span className={styles.statusLabel}>Ruta Seleccionada:</span>
+          <span className={styles.folderName}>{folderName}</span>
+        </div>
+      )}
     </div>
   );
 }

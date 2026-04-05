@@ -1,9 +1,26 @@
 /**
- * Obtiene las subcarpetas de un directorio handle
+ * fileSystemService.js - Capa Híbrida de Acceso a Archivos
+ * Detecta si está en Electron (nativo) o Navegador (Web API)
  */
-export const getSubDirs = async (dirHandle) => {
+
+const isElectron = () => !!(window.electronAPI && window.electronAPI.isElectron);
+
+/**
+ * Obtiene las subcarpetas de un directorio (handle o ruta)
+ */
+export const getSubDirs = async (dirHandleOrPath) => {
+  if (isElectron()) {
+    const contents = await window.electronAPI.listContents(dirHandleOrPath);
+    return contents
+      .filter(item => item.kind === "directory")
+      .map(item => ({
+        name: item.name,
+        handle: window.electronAPI.joinPaths(dirHandleOrPath, item.name)
+      }));
+  }
+  
   const dirs = [];
-  for await (const [name, handle] of dirHandle.entries()) {
+  for await (const [name, handle] of dirHandleOrPath.entries()) {
     if (handle.kind === 'directory') {
       dirs.push({ name, handle });
     }
@@ -12,11 +29,26 @@ export const getSubDirs = async (dirHandle) => {
 };
 
 /**
- * Obtiene los archivos de un directorio handle
+ * Obtiene los archivos de un directorio
  */
-export const getFiles = async (dirHandle) => {
+export const getFiles = async (dirHandleOrPath) => {
+  if (isElectron()) {
+    const contents = await window.electronAPI.listContents(dirHandleOrPath);
+    const files = [];
+    for (const item of contents) {
+      if (item.kind === "file") {
+        const filePath = window.electronAPI.joinPaths(dirHandleOrPath, item.name);
+        const buffer = await window.electronAPI.readFile(filePath);
+        // Convertimos Buffer/Uint8Array a File objeto simulado para JSZip
+        const file = new File([buffer], item.name);
+        files.push({ name: item.name, file, handle: filePath });
+      }
+    }
+    return files;
+  }
+
   const files = [];
-  for await (const [name, handle] of dirHandle.entries()) {
+  for await (const [name, handle] of dirHandleOrPath.entries()) {
     if (handle.kind === 'file') {
       const file = await handle.getFile();
       files.push({ name, file, handle });
@@ -28,52 +60,36 @@ export const getFiles = async (dirHandle) => {
 /**
  * Obtiene o crea un subdirectorio
  */
-export const getOrCreateSubDir = async (parentHandle, name) => {
-  return await parentHandle.getDirectoryHandle(name, { create: true });
-};
-
-/**
- * Intenta obtener un subdirectorio sin lanzar error si no existe
- */
-export const tryGetSubDir = async (parentHandle, name) => {
-  try {
-    return await parentHandle.getDirectoryHandle(name);
-  } catch {
-    return null;
+export const getOrCreateSubDir = async (parentHandleOrPath, name) => {
+  if (isElectron()) {
+    const subPath = window.electronAPI.joinPaths(parentHandleOrPath, name);
+    await window.electronAPI.mkdir(subPath);
+    return subPath;
   }
+  return await parentHandleOrPath.getDirectoryHandle(name, { create: true });
 };
 
 /**
- * Escribe un blob como archivo en un directorio
+ * Escribe un blob (ZIP) en un directorio
  */
-export const writeZipFile = async (dirHandle, filename, blob) => {
-  const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+export const writeZipFile = async (dirHandleOrPath, filename, blob) => {
+  if (isElectron()) {
+    const filePath = window.electronAPI.joinPaths(dirHandleOrPath, filename);
+    const arrayBuffer = await blob.arrayBuffer();
+    await window.electronAPI.writeFile(filePath, arrayBuffer);
+    return;
+  }
+  
+  const fileHandle = await dirHandleOrPath.getFileHandle(filename, { create: true });
   const writable = await fileHandle.createWritable();
   await writable.write(blob);
   await writable.close();
 };
 
 /**
- * Obtiene todas las carpetas que comienzan con "CXC" en el directorio raíz
+ * Obtiene todas las carpetas que comienzan con "CXC"
  */
-export const getCXCDirs = async (rootHandle) => {
-  const dirs = await getSubDirs(rootHandle);
+export const getCXCDirs = async (rootHandleOrPath) => {
+  const dirs = await getSubDirs(rootHandleOrPath);
   return dirs.filter(({ name }) => name.toUpperCase().startsWith('CXC'));
-};
-
-/**
- * Obtiene todos los archivos PDF de forma recursiva en un directorio
- */
-export const getPDFsRecursive = async (dirHandle) => {
-  const result = [];
-  for await (const [name, handle] of dirHandle.entries()) {
-    if (handle.kind === 'file' && name.toLowerCase().endsWith('.pdf')) {
-      const file = await handle.getFile();
-      result.push({ name, file, handle });
-    } else if (handle.kind === 'directory') {
-      const sub = await getPDFsRecursive(handle);
-      result.push(...sub);
-    }
-  }
-  return result;
 };

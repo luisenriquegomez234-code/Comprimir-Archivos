@@ -1,1 +1,9 @@
 node_modules
+dist/
+build/
+.eslintcache
+*.log
+git_log.txt
+git_log_utf8.txt
+git_oneline.txt
+err.txt

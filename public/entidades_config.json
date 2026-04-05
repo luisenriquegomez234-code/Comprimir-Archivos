@@ -1,0 +1,148 @@
+{
+  "positiva": {
+    "name": "1. POSITIVA COMPAÑIA DE SEGUROS S.A",
+    "tasks": [
+      {
+        "description": "Comprimir PDFs generales excluyendo el prefijo CTFE",
+        "folderMatch": "^CTFE",
+        "filesInclude": ["\\.pdf$"],
+        "filesExclude": ["^CTFE.*\\.pdf$"],
+        "zipName": "{folderName}.zip",
+        "outputSubfolder": ""
+      },
+      {
+        "description": "Comprimir archivos RIPS específicos",
+        "folderMatch": "^RIPS$",
+        "subTasks": [
+          {
+            "folderMatch": "^CTFE",
+            "filesInclude": ["^ad.*\\.xml$", "^ResultadosMSPS.*\\.txt$", "^Rips.*\\.json$"],
+            "filesExclude": [],
+            "zipName": "Rips_{folderName}.zip",
+            "outputRelativeTo": "parent"
+          }
+        ]
+      }
+    ]
+  },
+  "saludTotal": {
+    "name": "2. SALUD TOTAL EPS S S.A",
+    "tasks": [
+      {
+        "description": "JSONs en carpetas de números van a la carpeta COMPRIMIDO del CXC",
+        "folderMatch": "^\\d+$",
+        "subTasks": [
+          {
+            "folderMatch": ".*_CTFE.*",
+            "filesInclude": ["\\.json$"],
+            "filesExclude": [],
+            "zipName": "{folderName}.zip",
+            "outputSubfolder": "COMPRIMIDO",
+            "outputRelativeTo": "cxcRoot"
+          }
+        ]
+      },
+      {
+        "description": "PDFs en carpeta CTFE",
+        "folderMatch": "^CTFE",
+        "filesInclude": ["\\.pdf$"],
+        "filesExclude": ["^CTFE.*\\.pdf$"],
+        "zipName": "{folderName}.zip",
+        "outputSubfolder": ""
+      }
+    ]
+  },
+  "bolivar": {
+    "name": "3. COMPAÑIA DE SEGUROS BOLIVAR S.A",
+    "tasks": [
+      {
+        "description": "PDF, TXT y JSON con prefijo FAC_",
+        "folderMatch": "^CTFE",
+        "filesInclude": ["(\\.pdf|\\.txt|\\.json)$"],
+        "filesExclude": ["^CTFE.*\\.pdf$"],
+        "zipName": "FAC_{folderName}.zip",
+        "outputSubfolder": ""
+      }
+    ]
+  },
+  "mundial": {
+    "name": "4. COMPAÑIA MUNDIAL DE SEGUROS S.A",
+    "tasks": [
+      {
+        "folderMatch": "^\\d+$",
+        "subTasks": [
+          {
+            "folderMatch": "^CUV$",
+            "filesInclude": [".*"],
+            "filesExclude": ["\\.zip$"],
+            "zipName": "CUV.zip",
+            "outputSubfolder": ""
+          },
+          {
+            "folderMatch": "^RIPS$",
+            "filesInclude": [".*"],
+            "filesExclude": ["\\.zip$"],
+            "zipName": "RIPS.zip",
+            "outputSubfolder": ""
+          }
+        ]
+      },
+      {
+        "folderMatch": "^$", 
+        "filesInclude": ["\\.pdf$"],
+        "filesExclude": [],
+        "eachFileAsZip": true,
+        "zipName": "{fileNameWithoutExt}.zip",
+        "outputSubfolder": ""
+      }
+    ]
+  },
+  "sanitas": {
+    "name": "5. ENTIDAD PROMOTORA DE SALUD SANITAS",
+    "tasks": [
+      {
+        "folderMatch": "^CTFE",
+        "subTasks": [
+          {
+            "folderMatch": "^CTFE",
+            "filesInclude": ["(\\.xml|\\.pdf|\\.json)$"],
+            "filesExclude": ["^CTFE.*\\.pdf$"],
+            "zipName": "{folderName}.zip",
+            "outputSubfolder": ""
+          }
+        ]
+      }
+    ]
+  },
+  "previsora": {
+    "name": "6. LA PREVISORA S.A COMPAÑÍA DE SEGUROS",
+    "tasks": [
+      {
+        "folderMatch": "^\\d+$",
+        "subTasks": [
+          {
+            "folderMatch": "^CUV$",
+            "filesInclude": [".*"],
+            "filesExclude": ["\\.zip$"],
+            "zipName": "CUV.zip",
+            "outputSubfolder": ""
+          },
+          {
+            "folderMatch": "^RIPS$",
+            "filesInclude": [".*"],
+            "filesExclude": ["\\.zip$"],
+            "zipName": "RIPS.zip",
+            "outputSubfolder": ""
+          }
+        ]
+      },
+      {
+        "folderMatch": "^SOPORTES$",
+        "filesInclude": [".*"],
+        "filesExclude": ["\\.zip$"],
+        "zipName": "SOPORTES.zip",
+        "outputSubfolder": ""
+      }
+    ]
+  }
+}
